@@ -6,6 +6,7 @@
     <color name="normal_cell_bg">#FEFFFE</color>
     <color name="white">#FFFFFF</color>
     <color name="black">#000000</color>
+    <color name="green">#4BAF50</color>
     <color name="gray">#FF666666</color>
     <color name="red">#AF0000</color>
     <color name="bg_line">#E7E7E7</color>
@@ -21,10 +22,16 @@
     <color name="Subject7">#f9266f</color>
     <color name="Subject8">#0A5C10</color>
     <color name="Subject9">#E29305</color>
-    <color name="Subject10">#8BC34A</color>
+    <color name="Subject10">#C2FC7F</color>
+    <color name="Subject11">#0B2974</color>
+    <color name="Subject12">#7E6D30</color>
+    <color name="Subject13">#8BC34A</color>
+    <color name="Subject14">#43A37D</color>
+    <color name="Subject15">#927296</color>
 
-    <color name="bg_color">#5299DCD7</color>
+    <color name="bg_color">#FF99DCD7</color>
     <color name="tab_indicator_color">#66aea9</color>
     <color name="tab_text_color">#74c6c0</color>
     <color name="calendar_date_banner_background">#FFEEEEEE</color>
+
 </resources>

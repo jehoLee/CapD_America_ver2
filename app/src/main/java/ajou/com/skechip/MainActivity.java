@@ -16,7 +16,6 @@ import ajou.com.skechip.Event.GroupCreationEvent;
 import ajou.com.skechip.Fragment.EP_Fragment;
 import ajou.com.skechip.Fragment.FriendListFragment;
 import ajou.com.skechip.Fragment.GroupListFragment;
-import ajou.com.skechip.Fragment.TimeTableFragment;
 
 import com.kakao.friends.AppFriendContext;
 import com.kakao.friends.response.AppFriendsResponse;
@@ -59,7 +58,6 @@ public class MainActivity extends AppCompatActivity {
 
     //for Fragment
     private FragmentManager fragmentManager = getSupportFragmentManager();
-    private TimeTableFragment timeTableFragment;
     private FriendListFragment friendListFragment;
     private GroupListFragment groupListFragment;
     private EP_Fragment epFragment;
