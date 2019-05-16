@@ -1,6 +1,8 @@
 package ajou.com.skechip.Fragment;
 
 import android.os.Bundle;
+
+import ajou.com.skechip.Fragment.bean.FriendEntity;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -15,21 +17,25 @@ import android.widget.ListView;
 
 import ajou.com.skechip.Adapter.FriendListAdapter;
 import ajou.com.skechip.R;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
+
 import com.kakao.friends.response.model.AppFriendInfo;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class FriendListFragment extends Fragment {
+    private FriendListFragment tmp = this;
     private final String TAG = "#FriendListFragment: ";
-
+    private FriendTimetableFragment friend_timetable = new FriendTimetableFragment();
     private List<String> friendsNickname_list = new ArrayList<>();
     private String kakaoUserImg;
     private String kakaoUserName;
     private Long kakaoUserID;
     private List<AppFriendInfo> kakaoFriends;
-//    private List<FriendEntity> friendEntities = new ArrayList<>();
-
+    private List<FriendEntity> friendEntities = new ArrayList<>();
+    private FragmentManager fragmentManager;
     private Boolean isForGroupCreation;
 
     private FriendListAdapter friendListAdapter;
@@ -62,6 +68,8 @@ public class FriendListFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         Log.d(TAG, "onCreateView");
+        fragmentManager = getActivity().getSupportFragmentManager();
+
         View view;
         view = inflater.inflate(R.layout.fragment_friend_list, container, false);
         ListAdapter adapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_list_item_1, friendsNickname_list);
@@ -72,7 +80,9 @@ public class FriendListFragment extends Fragment {
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                         String item = String.valueOf(parent.getItemAtPosition(position));
-
+                        FragmentTransaction transaction = fragmentManager.beginTransaction();
+                        transaction.add(R.id.frame_layout, friend_timetable).hide(tmp);
+                        transaction.commit();
                     }
                 }
         );

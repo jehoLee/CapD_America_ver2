@@ -1,12 +1,18 @@
 package ajou.com.skechip.Adapter;
 
+import android.app.Activity;
 import android.content.Context;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
+
+import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import ajou.com.skechip.Fragment.bean.Cell;
@@ -23,6 +29,7 @@ public class EP_CustomAdapter extends BaseExcelPanelAdapter <RowTitle, ColTitle,
 
     public EP_CustomAdapter(Context context, View.OnClickListener blockListener) {
         super(context);
+
         this.context = context;
         this.blockListener = blockListener;
     }
@@ -46,6 +53,13 @@ public class EP_CustomAdapter extends BaseExcelPanelAdapter <RowTitle, ColTitle,
         viewHolder.cellContainer.setOnClickListener(blockListener);
         if(cell.getStatus()==-1){
             viewHolder.cellContainer.setBackgroundResource(R.drawable.revise_selected);
+
+        }
+        else if(cell.getStatus()==-2){
+            viewHolder.cellContainer.setBackgroundResource(R.drawable.ic_checkbox);
+        }
+        else if(cell.getStatus()==-3){
+            viewHolder.cellContainer.setBackgroundResource(R.drawable.ic_checkbox_selected);
         }
         else if (cell.getStatus() == 0) {
             viewHolder.bookingName.setText("");
@@ -90,7 +104,6 @@ public class EP_CustomAdapter extends BaseExcelPanelAdapter <RowTitle, ColTitle,
     }
 
     static class CellHolder extends RecyclerView.ViewHolder {
-
         public final TextView bookingName;
         public final TextView channelName;
         public final LinearLayout cellContainer;
