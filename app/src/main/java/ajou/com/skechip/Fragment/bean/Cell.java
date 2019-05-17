@@ -15,6 +15,10 @@ public class Cell {
     private String startTime;
     private String weekofday;
 
+
+    //weekDay
+    //cellPosition
+
     public int getStatus() {
         return status;
     }

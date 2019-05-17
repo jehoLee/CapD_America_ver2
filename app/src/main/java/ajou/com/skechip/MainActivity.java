@@ -11,11 +11,17 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.appcompat.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import ajou.com.skechip.Event.GroupCreationEvent;
 import ajou.com.skechip.Fragment.EP_Fragment;
 import ajou.com.skechip.Fragment.FriendListFragment;
 import ajou.com.skechip.Fragment.GroupListFragment;
+import ajou.com.skechip.Retrofit.models.TimeTable;
+import ajou.com.skechip.Retrofit.models.TimeTablesResponse;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 import com.kakao.friends.AppFriendContext;
 import com.kakao.friends.response.AppFriendsResponse;
@@ -36,6 +42,9 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 import org.opencv.core.Mat;
+
+import ajou.com.skechip.Retrofit.api.RetrofitClient;
+import ajou.com.skechip.Retrofit.models.DefaultResponse;
 
 public class MainActivity extends AppCompatActivity {
     private final String TAG = "ssss.MainActivity";
@@ -81,6 +90,7 @@ public class MainActivity extends AppCompatActivity {
     private Mat img_input;
     private Mat img_output;
 
+//    private List<TimeTable> timeList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,11 +102,11 @@ public class MainActivity extends AppCompatActivity {
 
 
     /*
-    * init_Main() 함수
-    * 1. kakao 계정의 친구 목록을 불러온다
-    * 2. kakao 계정의 유저 정보를 불러온다
-    * 3. 위 정보를 불러온 뒤에, fragment를 초기화하고 navigationView를 등록한다.
-    * */
+     * init_Main() 함수
+     * 1. kakao 계정의 친구 목록을 불러온다
+     * 2. kakao 계정의 유저 정보를 불러온다
+     * 3. 위 정보를 불러온 뒤에, fragment를 초기화하고 navigationView를 등록한다.
+     * */
     public void init_Main() {
         KakaoTalkService.getInstance().requestAppFriends(friendContext,
                 new TalkResponseCallback<AppFriendsResponse>() {
@@ -162,28 +172,13 @@ public class MainActivity extends AppCompatActivity {
                                 @Override
                                 public void onSuccess(MeV2Response response) {
                                     kakaoUserInfo = response;
+                                    saveUser(kakaoUserInfo);
 
-//                                    Call<DefaultResponse> call = RetrofitClient
-////                                            .getInstance()
-////                                            .getApi()
-////                                            .createUser(kakaoUserInfo.getId(), kakaoUserInfo.getNickname());
-////
-////                                    call.enqueue(new Callback<DefaultResponse>() {
-////                                        @Override
-////                                        public void onResponse(Call<DefaultResponse> call, Response<DefaultResponse> response) {
-////                                            if (response.code() == 201) {
-////                                                DefaultResponse dr = response.body();
-////                                                Toast.makeText(MainActivity.this, "User created successfully", Toast.LENGTH_LONG).show();
-////                                            } else if (response.code() == 422) {
-////                                                Toast.makeText(MainActivity.this, "User already exist", Toast.LENGTH_LONG).show();
-////                                            }
-////                                        }
-////                                        @Override
-////                                        public void onFailure(Call<DefaultResponse> call, Throwable t) {
-////                                            Toast.makeText(MainActivity.this, t.getMessage(), Toast.LENGTH_LONG).show();
-////                                        }
-////                                    });
-
+                                    for(AppFriendInfo friend : kakaoFriends){
+                                        saveUser(friend);
+                                        saveFriendRelationShip(kakaoUserInfo, friend);
+                                    }
+//                                    saveTimeTable(kakaoUserInfo);
                                     initiateFragmentsAndNavigation();
                                 }
                             });
@@ -217,7 +212,7 @@ public class MainActivity extends AppCompatActivity {
         transaction.add(R.id.frame_layout, groupListFragment).hide(groupListFragment);
         transaction.add(R.id.frame_layout, friendListFragment).hide(friendListFragment);
         transaction.add(R.id.frame_layout, epFragment);
-        transaction.commit();
+        transaction.commitAllowingStateLoss();
 
         curActivatedFragment = epFragment;
 
@@ -246,6 +241,97 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+
+    private void saveUser(final AppFriendInfo user){
+        Call<DefaultResponse> call = RetrofitClient
+                .getInstance()
+                .getApi()
+                .createUser(user.getId(), user.getProfileNickname(), 0);
+
+        call.enqueue(new Callback<DefaultResponse>() {
+            @Override
+            public void onResponse(Call<DefaultResponse> call, Response<DefaultResponse> response) {
+//                if (response.code() == 201) {
+//                    DefaultResponse dr = response.body();
+//                    Toast.makeText(MainActivity.this, user.getProfileNickname() + " created successfully", Toast.LENGTH_LONG).show();
+//                } else if (response.code() == 422) {
+//                    Toast.makeText(MainActivity.this, user.getProfileNickname() + " already exist", Toast.LENGTH_LONG).show();
+//                }
+            }
+            @Override
+            public void onFailure(Call<DefaultResponse> call, Throwable t) {
+                Toast.makeText(MainActivity.this, t.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    private void saveUser(final MeV2Response user){
+        Call<DefaultResponse> call = RetrofitClient
+                .getInstance()
+                .getApi()
+                .createUser(user.getId(), user.getNickname(),1);
+
+        call.enqueue(new Callback<DefaultResponse>() {
+            @Override
+            public void onResponse(Call<DefaultResponse> call, Response<DefaultResponse> response) {
+
+//                if (response.code() == 201) {
+//                    DefaultResponse dr = response.body();
+//                    Toast.makeText(MainActivity.this, user.getNickname() + " created successfully", Toast.LENGTH_LONG).show();
+//                } else if (response.code() == 422) {
+//                    Toast.makeText(MainActivity.this, user.getNickname() + " already exist", Toast.LENGTH_LONG).show();
+//                }
+            }
+            @Override
+            public void onFailure(Call<DefaultResponse> call, Throwable t) {
+                Toast.makeText(MainActivity.this, t.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    public void saveFriendRelationShip(final MeV2Response user, final AppFriendInfo friend){
+        Call<DefaultResponse> call = RetrofitClient
+                .getInstance()
+                .getApi()
+                .createFriend(user.getId(), friend.getId());
+        call.enqueue(new Callback<DefaultResponse>() {
+            @Override
+            public void onResponse(Call<DefaultResponse> call, Response<DefaultResponse> response) {
+//                if (response.code() == 201) {
+//                    DefaultResponse dr = response.body();
+//                    Toast.makeText(MainActivity.this, user.getNickname() + "과"+ friend.getProfileNickname() + "의 Friend relationship created successfully", Toast.LENGTH_LONG).show();
+//                } else if (response.code() == 422) {
+//                    Toast.makeText(MainActivity.this, user.getNickname() + "과"+ friend.getProfileNickname() + "의 Friend relationship already exist", Toast.LENGTH_LONG).show();
+//                }
+            }
+            @Override
+            public void onFailure(Call<DefaultResponse> call, Throwable t) {
+                Toast.makeText(MainActivity.this, t.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+//    private void saveTimeTable(final MeV2Response user){
+//        Call<TimeTablesResponse> call = RetrofitClient
+//                .getInstance()
+//                .getApi()
+//                .getTimeTables(user.getId());
+//        Log.e("잘됩니까?", "0 굳");
+//        call.enqueue(new Callback<TimeTablesResponse>() {
+//            @Override
+//            public void onResponse(Call<TimeTablesResponse> call, Response<TimeTablesResponse> response) {
+//                Log.e("잘됩니까?", "1"+"굳");
+//                timeList = response.body().getTimeTables();
+//                Log.e("잘됩니까?", timeList.get(1).getPlace()+"굳");
+////                Toast.makeText(MainActivity.this, courseList.get(1).getPlace(), Toast.LENGTH_LONG).show();
+//            }
+//
+//            @Override
+//            public void onFailure(Call<TimeTablesResponse> call, Throwable t) {
+//                Toast.makeText(MainActivity.this, t.getMessage(), Toast.LENGTH_LONG).show();
+//            }
+//        });
+//    }
 
     public void savePreferencesBoolean(String key, boolean value){
         SharedPreferences pref = getSharedPreferences("pref", MODE_PRIVATE);

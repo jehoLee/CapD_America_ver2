@@ -10,7 +10,6 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.appcompat.app.AlertDialog;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,10 +33,15 @@ import ajou.com.skechip.R;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
+import ajou.com.skechip.Retrofit.api.RetrofitClient;
+import ajou.com.skechip.Retrofit.models.TimeTable;
+import ajou.com.skechip.Retrofit.models.TimeTablesResponse;
 import ajou.com.skechip.UploadingActivity;
 import cn.zhouchaoyuan.excelpanel.ExcelPanel;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class EP_Fragment extends Fragment {
     public static final String WEEK_FORMAT_PATTERN = "EEEE";
@@ -68,6 +72,10 @@ public class EP_Fragment extends Fragment {
     private List<AppFriendInfo> kakaoFriendInfo_list;
     private List<FriendEntity> friendEntities = new ArrayList<>();
     private Boolean timeTableUploaded;
+
+    private  List<Cell> cells1;
+
+    private List<TimeTable> timeTableList;
 
     public static EP_Fragment newInstance(Bundle bundle) {
         EP_Fragment fragment = new EP_Fragment();
@@ -112,19 +120,19 @@ public class EP_Fragment extends Fragment {
             excelPanel.setAdapter(adapter);
             append = view.findViewById(R.id.append_timetable_button);
             append.setVisibility(View.INVISIBLE);
-            PLACE_NAME.add("");
-            PLACE_NAME.add("팔달325");
-            PLACE_NAME.add("팔달409");
-            PLACE_NAME.add("팔달410");
-            PLACE_NAME.add("팔달309");
-            PLACE_NAME.add("팔달409");
-
-            SUBJECT_NAME.add("");
-            SUBJECT_NAME.add("정보보호");
-            SUBJECT_NAME.add("이산수학");
-            SUBJECT_NAME.add("확률통계");
-            SUBJECT_NAME.add("캡디");
-            SUBJECT_NAME.add("컴파일러");
+//            PLACE_NAME.add("");
+//            PLACE_NAME.add("팔달325");
+//            PLACE_NAME.add("팔달409");
+//            PLACE_NAME.add("팔달410");
+//            PLACE_NAME.add("팔달309");
+//            PLACE_NAME.add("팔달409");
+//
+//            SUBJECT_NAME.add("");
+//            SUBJECT_NAME.add("정보보호");
+//            SUBJECT_NAME.add("이산수학");
+//            SUBJECT_NAME.add("확률통계");
+//            SUBJECT_NAME.add("캡디");
+//            SUBJECT_NAME.add("컴파일러");
 //        revise_mode = bundle.getBoolean("revise_mode");
             revise_mode = false;
             initData();
@@ -398,26 +406,95 @@ public class EP_Fragment extends Fragment {
         rowTitles.addAll(genRowData(startTime));
         colTitles.addAll(genColData());
 
-        List<Cell> cells1 = genCellData();
+        initTimeTableView();
+
+
 //        for (int i = 0; i < cells1.size(); i++) {
 //            Log.e("sssss",""+cells1.get(i));
 //            cells.get(i).addAll(cells1.get(i));
 //        }
-        for (int i = 0; i < ROW_SIZE; i++) {
-            List<Cell> tmplist = new ArrayList<Cell>();
-            for (int j = 0; j < PAGE_SIZE; j++) {
-                Cell tmp = cells1.get(i * PAGE_SIZE + j);
-                tmp.setStartTime(colTitles.get(i).getTimeRangeName().split("~")[0]);
-                Log.e("sss",""+colTitles.get(i).getTimeRangeName().split("~")[0]);
-                tmp.setWeekofday(rowTitles.get(j).getWeekString());
-                tmplist.add(tmp);
+//        for (int i = 0; i < ROW_SIZE; i++) {
+//            List<Cell> tmplist = new ArrayList<Cell>();
+//            for (int j = 0; j < PAGE_SIZE; j++) {
+//                Cell tmp = cells1.get(i * PAGE_SIZE + j);
+//                tmp.setStartTime(colTitles.get(i).getTimeRangeName().split("~")[0]);
+//                Log.e("sss",""+colTitles.get(i).getTimeRangeName().split("~")[0]);
+//                tmp.setWeekofday(rowTitles.get(j).getWeekString());
+//                tmplist.add(tmp);
+//            }
+//            cells.get(i).addAll(tmplist);
+//        }
+//        progress.setVisibility(View.GONE);
+//        adapter.setAllData(colTitles, rowTitles, cells);
+//        adapter.disableFooter();
+//        adapter.disableHeader();
+    }
+
+    private void initTimeTableView() {
+        Call<TimeTablesResponse> call = RetrofitClient
+                .getInstance()
+                .getApi()
+                .getTimeTables(kakaoUserID);
+
+        call.enqueue(new Callback<TimeTablesResponse>() {
+            @Override
+            public void onResponse(Call<TimeTablesResponse> call, Response<TimeTablesResponse> response) {
+                timeTableList = response.body().getTimeTables();
+
+                SUBJECT_NAME.add("");
+                PLACE_NAME.add("");
+
+                ArrayList<Cell> cellList = new ArrayList<>();
+                int cursor = 0;
+                for (int i = 0; i < ROW_SIZE * PAGE_SIZE; i++) {
+                    Cell cell = new Cell();
+                    if (i == timeTableList.get(cursor).getCellPosition()) {
+                        if (SUBJECT_NAME.contains(timeTableList.get(cursor).getTitle())) {
+                            int num = SUBJECT_NAME.indexOf(timeTableList.get(cursor).getTitle());
+                            cell.setStatus(num);
+                            cell.setPlaceName(PLACE_NAME.get(num));
+                            cell.setSubjectName(SUBJECT_NAME.get(num));
+//                    Log.e("Cell val:",""+NAME[number]+i+j);
+                        } else {
+                            cell.setStatus(PLACE_NAME.size());
+                            cell.setPlaceName(timeTableList.get(cursor).getPlace());
+                            cell.setSubjectName(timeTableList.get(cursor).getTitle());
+//
+                            PLACE_NAME.add(timeTableList.get(cursor).getPlace());
+                            SUBJECT_NAME.add(timeTableList.get(cursor).getTitle());
+                        }
+                        cursor++;
+                    } else {
+                        cell.setStatus(0);
+//                    Log.e("Cell val:",""+0);
+                    }
+                    cellList.add(cell);
+                }
+
+                cells1 = cellList;
+
+                for (int i = 0; i < ROW_SIZE; i++) {
+                    List<Cell> tmplist = new ArrayList<Cell>();
+                    for (int j = 0; j < PAGE_SIZE; j++) {
+                        Cell tmp = cells1.get(i * PAGE_SIZE + j);
+                        tmp.setStartTime(colTitles.get(i).getTimeRangeName().split("~")[0]);
+//                        Log.e("sss", "" + colTitles.get(i).getTimeRangeName().split("~")[0]);
+                        tmp.setWeekofday(rowTitles.get(j).getWeekString());
+                        tmplist.add(tmp);
+                    }
+                    cells.get(i).addAll(tmplist);
+                }
+
+                progress.setVisibility(View.GONE);
+                adapter.setAllData(colTitles, rowTitles, cells);
+                adapter.disableFooter();
+                adapter.disableHeader();
             }
-            cells.get(i).addAll(tmplist);
-        }
-        progress.setVisibility(View.GONE);
-        adapter.setAllData(colTitles, rowTitles, cells);
-        adapter.disableFooter();
-        adapter.disableHeader();
+
+            @Override
+            public void onFailure(Call<TimeTablesResponse> call, Throwable t) {
+            }
+        });
     }
 
     private List<RowTitle> genRowData(long startTime) {
@@ -458,25 +535,40 @@ public class EP_Fragment extends Fragment {
     }
 
     //====================================generate data==========================================
-    private ArrayList<Cell> genCellData() {
-        ArrayList<Cell> cellList = new ArrayList<>();
-        for (int i = 0; i < ROW_SIZE * PAGE_SIZE; i++) {
-            Cell cell = new Cell();
-            Random random = new Random();
-            int number = random.nextInt(15);
-            if (number == 1 || number == 2 || number == 3 || number == 4 || number == 5) {
-                cell.setStatus(number);
-                cell.setPlaceName(PLACE_NAME.get(number));
-                cell.setSubjectName(SUBJECT_NAME.get(number));
-//                    Log.e("Cell val:",""+NAME[number]+i+j);
-            } else {
-                cell.setStatus(0);
-//                    Log.e("Cell val:",""+0);
-            }
-            cellList.add(cell);
-        }
-        return cellList;
-    }
+//    private ArrayList<Cell> genCellData() {
+////        saveCourseList();
+//        ArrayList<Cell> cellList = new ArrayList<>();
+//        int cursor=0;
+//        for (int i = 0; i < ROW_SIZE * PAGE_SIZE; i++) {
+//            Cell cell = new Cell();
+//            if(i==courseList.get(cursor).getSellPosition()) {
+//                if(SUBJECT_NAME.contains(courseList.get(cursor).getTitle())) {
+//                    int num = SUBJECT_NAME.indexOf(courseList.get(cursor).getTitle());
+//                    cell.setStatus(num);
+//                    cell.setPlaceName(PLACE_NAME.get(num));
+//                    cell.setSubjectName(SUBJECT_NAME.get(num));
+////                    Log.e("Cell val:",""+NAME[number]+i+j);
+//                    cursor++;
+//                }
+//                else{
+//                    cell.setStatus(PLACE_NAME.size());
+//                    cell.setPlaceName(courseList.get(cursor).getPlace());
+//                    cell.setSubjectName(courseList.get(cursor).getTitle());
+////
+//                    PLACE_NAME.add(courseList.get(cursor).getPlace());
+//                    SUBJECT_NAME.add(courseList.get(cursor).getTitle());
+//
+//                }
+//            }
+//            else {
+//                cell.setStatus(0);
+////                    Log.e("Cell val:",""+0);
+//            }
+//            cellList.add(cell);
+//        }
+//        return cellList;
+//    }
+
     private void Onmeeting_created(ArrayList<Cell> cell){
         for(int i=0;i<cell.size();i++)
             SELECTED_CELLS.add(getCell(cell.get(i).getStartTime(),cell.get(i).getWeekofday()));
@@ -553,4 +645,32 @@ public class EP_Fragment extends Fragment {
                 return cell.get(4);
         }
     }
+//    private void saveCourseList(){
+//        Call<TimeTablesResponse> call = RetrofitClient
+////                .getInstance()
+//                .getApi()
+//                .getCourse(kakaoUserID);
+//
+//        Log.e("여기예요", kakaoUserID + "입니다.");
+//
+//        call.enqueue(new Callback<TimeTablesResponse>() {
+//            @Override
+//            public void onResponse(Call<TimeTablesResponse> call, Response<TimeTablesResponse> response) {
+//                Log.e("여기예요",  "여기도 됐다 입니다.");
+//
+//                courseList = response.body().getCourse();
+//                Log.e("여기예요", courseList.get(1).getPlace() + "입니다.");
+//
+//                for(TimeTable c : courseList){
+////                    Toast.makeText(getActivity(), c.getSellPosition(), Toast.LENGTH_LONG).show();
+//                }
+//            }
+//
+//            @Override
+//            public void onFailure(Call<TimeTablesResponse> call, Throwable t) {
+//                Log.e("여기예요", t.getMessage() + "입니다.");
+//            }
+//        });
+//    }
+
 }

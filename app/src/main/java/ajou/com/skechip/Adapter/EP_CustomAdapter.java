@@ -55,12 +55,7 @@ public class EP_CustomAdapter extends BaseExcelPanelAdapter <RowTitle, ColTitle,
             viewHolder.cellContainer.setBackgroundResource(R.drawable.revise_selected);
 
         }
-        else if(cell.getStatus()==-2){
-            viewHolder.cellContainer.setBackgroundResource(R.drawable.ic_checkbox);
-        }
-        else if(cell.getStatus()==-3){
-            viewHolder.cellContainer.setBackgroundResource(R.drawable.ic_checkbox_selected);
-        }
+
         else if (cell.getStatus() == 0) {
             viewHolder.bookingName.setText("");
             viewHolder.channelName.setText("");

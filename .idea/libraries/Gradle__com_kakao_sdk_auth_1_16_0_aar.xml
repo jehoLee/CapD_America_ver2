@@ -1,8 +1,8 @@
 <component name="libraryTable">
   <library name="Gradle: com.kakao.sdk:auth:1.16.0@aar">
     <CLASSES>
-      <root url="jar://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/jetified-auth-1.16.0.aar/f98e5dc046f04502efaffa35b77efe49/jars/classes.jar!/" />
-      <root url="file://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/jetified-auth-1.16.0.aar/f98e5dc046f04502efaffa35b77efe49/res" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/jetified-auth-1.16.0.aar/ce75f122ab4d99ea52a2353f0a7af881/res" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-1/files-1.1/jetified-auth-1.16.0.aar/ce75f122ab4d99ea52a2353f0a7af881/jars/classes.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES>
